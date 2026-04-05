@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "cd Mern-Form && npm install && npm run build",
+  "buildCommand": "cd Mern-Form && npm run build",
   "outputDirectory": "Mern-Form/dist",
-  "installCommand": "npm install"
+  "installCommand": "cd Mern-Form && npm install"
 }
