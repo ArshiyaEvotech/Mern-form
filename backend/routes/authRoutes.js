@@ -13,7 +13,9 @@ const DEFAULT_USERS = {
     role: 'user'
   }
 };
-
+app.get('/', (req, res) => {
+  res.send('Evotech Backend is Running and Connected!');
+});
 router.post('/register', async (req, res) => {
   try {
     const { email, password, role = 'user' } = req.body;
