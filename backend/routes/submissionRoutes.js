@@ -2,6 +2,11 @@
 const router = require('express').Router();
 const Submission = require('../models/Submission');
 
+router.get('/', async (_req, res) => {
+  const results = await Submission.find().sort({ createdAt: -1 });
+  res.json(results);
+});
+
 // User submits form [cite: 11, 24]
 router.post('/', async (req, res) => {
   const submission = new Submission({
