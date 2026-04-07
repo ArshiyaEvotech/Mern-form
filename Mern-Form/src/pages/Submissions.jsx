@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { getFormById, getSubmissionsByForm } from "../Services/api";
+import {
+  getApiErrorMessage,
+  getFormById,
+  getSubmissionsByForm,
+} from "../Services/api";
 
 const Submissions = () => {
   const { id } = useParams();
   const [form, setForm] = useState(null);
   const [submissions, setSubmissions] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const loadData = async () => {
@@ -19,9 +24,11 @@ const Submissions = () => {
 
         setForm(formResponse.data);
         setSubmissions(submissionsResponse.data);
-      } catch (_error) {
+        setError("");
+      } catch (error) {
         setForm(null);
         setSubmissions([]);
+        setError(getApiErrorMessage(error, "Failed to load submissions"));
       }
     };
 
@@ -39,6 +46,8 @@ const Submissions = () => {
           <h2 style={{ marginTop: 0 }}>
             Responses for {form?.title || `Form ${id}`}
           </h2>
+
+          {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
 
           {submissions.length === 0 && <p>No responses submitted yet.</p>}
 

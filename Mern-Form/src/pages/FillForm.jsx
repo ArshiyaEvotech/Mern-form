@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getFormById, submitForm } from "../Services/api";
+import { getApiErrorMessage, getFormById, submitForm } from "../Services/api";
 
 const FillForm = () => {
   const { id } = useParams();
@@ -9,14 +9,17 @@ const FillForm = () => {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const loadForm = async () => {
       try {
         const response = await getFormById(id);
         setForm(response.data);
-      } catch (_error) {
+        setError("");
+      } catch (error) {
         setForm(null);
+        setError(getApiErrorMessage(error, "Failed to load form"));
       } finally {
         setLoading(false);
       }
@@ -30,7 +33,7 @@ const FillForm = () => {
   }
 
   if (!form) {
-    return <h2 style={{ padding: "20px" }}>Form not found</h2>;
+    return <h2 style={{ padding: "20px" }}>{error || "Form not found"}</h2>;
   }
 
   const handleChange = (label, value) => {
@@ -56,6 +59,7 @@ const FillForm = () => {
 
     try {
       setIsSubmitting(true);
+      setError("");
       await submitForm({
         formId: form._id,
         submittedBy: localStorage.getItem("userEmail") || "user@evotech.global",
@@ -64,8 +68,10 @@ const FillForm = () => {
 
       alert("Submitted Successfully");
       navigate("/user");
-    } catch (_error) {
-      alert("Failed to submit form");
+    } catch (error) {
+      const message = getApiErrorMessage(error, "Failed to submit form");
+      setError(message);
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -95,6 +101,12 @@ const FillForm = () => {
         <p style={{ color: "#4b5563", marginTop: 0, marginBottom: "24px" }}>
           Enter your details below and submit the form.
         </p>
+
+        {error && (
+          <p style={{ color: "#b91c1c", marginTop: 0, marginBottom: "16px" }}>
+            {error}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit}>
           {form.fields.map((field, index) => (

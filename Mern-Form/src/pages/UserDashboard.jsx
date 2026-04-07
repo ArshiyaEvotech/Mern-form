@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { getForms } from "../Services/api";
+import { getApiErrorMessage, getForms } from "../Services/api";
 
 const UserDashboard = () => {
   const [forms, setForms] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,8 +14,10 @@ const UserDashboard = () => {
       try {
         const response = await getForms();
         setForms(response.data);
-      } catch (_error) {
+        setError("");
+      } catch (error) {
         setForms([]);
+        setError(getApiErrorMessage(error, "Failed to load forms"));
       }
     };
 
@@ -66,6 +69,12 @@ const UserDashboard = () => {
             >
             Click any form to enter your details and submit it.
             </p>
+
+            {error && (
+              <p style={{ marginTop: 0, marginBottom: "18px", color: "#b91c1c" }}>
+                {error}
+              </p>
+            )}
 
             {forms.length === 0 && <p style={{ margin: 0 }}>No interview forms available right now.</p>}
 

@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { deleteAllForms, getForms } from "../Services/api";
+import { deleteAllForms, getApiErrorMessage, getForms } from "../Services/api";
 import "../App.css";
 
 const FormsList = () => {
   const [forms, setForms] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,8 +15,10 @@ const FormsList = () => {
       try {
         const response = await getForms();
         setForms(response.data);
-      } catch (_error) {
+        setError("");
+      } catch (error) {
         setForms([]);
+        setError(getApiErrorMessage(error, "Failed to load forms"));
       }
     };
 
@@ -63,6 +66,12 @@ const FormsList = () => {
             >
               Review Forms
             </h2>
+
+            {error && (
+              <p style={{ marginTop: 0, marginBottom: "14px", color: "#b91c1c" }}>
+                {error}
+              </p>
+            )}
 
             {forms.length === 0 && <p style={{ margin: 0 }}>No forms created yet</p>}
             {forms.length > 0 && (

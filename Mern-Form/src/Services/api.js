@@ -12,16 +12,6 @@ const instance = axios.create({
 
 const OFFLINE_FORMS_KEY = "offlineForms";
 const OFFLINE_SUBMISSIONS_KEY = "offlineSubmissions";
-const DEFAULT_USERS = {
-  "admin@evotech.global": {
-    password: "Evotech@123",
-    role: "admin",
-  },
-  "user@evotech.global": {
-    password: "Evotech@123",
-    role: "user",
-  },
-};
 
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
@@ -54,14 +44,6 @@ const writeJson = (key, value) => {
   window.localStorage.setItem(key, JSON.stringify(value));
 };
 
-const createId = (prefix) =>
-  `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-const createResponse = (data, status = 200) => ({
-  data,
-  status,
-});
-
 const createErrorResponse = (status, message) => {
   const error = new Error(message);
   error.response = {
@@ -71,22 +53,22 @@ const createErrorResponse = (status, message) => {
   return error;
 };
 
-const shouldUseOfflineFallback = (error) => {
-  if (!error) {
-    return false;
-  }
-
-  if (!error.response) {
-    return true;
-  }
-
-  return error.response.status >= 500;
-};
-
 const shouldSkipNetworkRequest = () =>
   isBrowser &&
   typeof navigator !== "undefined" &&
   navigator.onLine === false;
+
+export const getApiErrorMessage = (error, fallbackMessage) => {
+  if (!baseURL) {
+    return "Frontend is running, but VITE_API_URL is not configured.";
+  }
+
+  if (error?.code === "ERR_NETWORK" || !error?.response) {
+    return `Cannot reach the backend API at ${baseURL}. Make sure the backend server is running and accessible.`;
+  }
+
+  return error.response?.data?.message || error.message || fallbackMessage;
+};
 
 const getOfflineForms = () => readJson(OFFLINE_FORMS_KEY, []);
 const saveOfflineForms = (forms) => writeJson(OFFLINE_FORMS_KEY, forms);
@@ -105,12 +87,6 @@ const cacheForms = (forms) => {
   saveOfflineForms(forms);
 };
 
-const cacheSubmission = (submission) => {
-  const submissions = getOfflineSubmissions();
-  submissions.push(submission);
-  saveOfflineSubmissions(submissions);
-};
-
 const cacheSubmissionsForForm = (formId, submissions) => {
   const existing = getOfflineSubmissions().filter(
     (submission) => submission.formId !== formId
@@ -118,50 +94,41 @@ const cacheSubmissionsForForm = (formId, submissions) => {
   saveOfflineSubmissions([...existing, ...submissions]);
 };
 
-const buildOfflineToken = (email, role) =>
-  `offline-token:${btoa(JSON.stringify({ email, role }))}`;
-
-const loginOffline = ({ email, password }) => {
-  const normalizedEmail = email?.trim().toLowerCase();
-  const normalizedPassword = password ?? "";
-  const user = DEFAULT_USERS[normalizedEmail];
-
-  if (!user) {
-    throw createErrorResponse(401, "Invalid Email");
-  }
-
-  if (user.password !== normalizedPassword) {
-    throw createErrorResponse(401, "Invalid Password");
-  }
-
-  return createResponse({
-    token: buildOfflineToken(normalizedEmail, user.role),
-    user: {
-      email: normalizedEmail,
-      role: user.role,
-    },
-  });
-};
-
 export const loginUser = async (payload) => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    return loginOffline(payload);
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
     return await instance.post("/auth/login", payload);
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    return loginOffline(payload);
+    throw error;
   }
 };
 
 export const getForms = async () => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    return createResponse(getOfflineForms());
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
@@ -169,21 +136,23 @@ export const getForms = async () => {
     cacheForms(response.data);
     return response;
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    return createResponse(getOfflineForms());
+    throw error;
   }
 };
 
 export const getFormById = async (id) => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    const form = getOfflineForms().find((item) => item._id === id);
-    if (!form) {
-      throw createErrorResponse(404, "Form not found");
-    }
-    return createResponse(form);
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
@@ -191,30 +160,23 @@ export const getFormById = async (id) => {
     cacheForm(response.data);
     return response;
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    const form = getOfflineForms().find((item) => item._id === id);
-    if (!form) {
-      throw createErrorResponse(404, "Form not found");
-    }
-    return createResponse(form);
+    throw error;
   }
 };
 
 export const createForm = async (payload) => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    const form = {
-      ...payload,
-      _id: createId("form"),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: localStorage.getItem("userEmail") || "admin@evotech.global",
-    };
-    const forms = [...getOfflineForms(), form];
-    saveOfflineForms(forms);
-    return createResponse(form, 201);
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
@@ -222,28 +184,23 @@ export const createForm = async (payload) => {
     cacheForm(response.data);
     return response;
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    const form = {
-      ...payload,
-      _id: createId("form"),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: localStorage.getItem("userEmail") || "admin@evotech.global",
-    };
-    const forms = [...getOfflineForms(), form];
-    saveOfflineForms(forms);
-    return createResponse(form, 201);
+    throw error;
   }
 };
 
 export const deleteAllForms = async () => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    saveOfflineForms([]);
-    saveOfflineSubmissions([]);
-    return createResponse({ message: "All forms deleted successfully" });
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
@@ -252,65 +209,46 @@ export const deleteAllForms = async () => {
     saveOfflineSubmissions([]);
     return response;
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    saveOfflineForms([]);
-    saveOfflineSubmissions([]);
-    return createResponse({ message: "All forms deleted successfully" });
+    throw error;
   }
 };
 
 export const submitForm = async (payload) => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    const submission = {
-      _id: createId("submission"),
-      formId: payload.formId,
-      submittedBy: payload.submittedBy,
-      responses: payload.data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    cacheSubmission(submission);
-    return createResponse({ message: "Submitted successfully" }, 201);
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
     const response = await instance.post("/submissions", payload);
-    cacheSubmission({
-      _id: createId("submission"),
-      formId: payload.formId,
-      submittedBy: payload.submittedBy,
-      responses: payload.data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
     return response;
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    const submission = {
-      _id: createId("submission"),
-      formId: payload.formId,
-      submittedBy: payload.submittedBy,
-      responses: payload.data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    cacheSubmission(submission);
-    return createResponse({ message: "Submitted successfully" }, 201);
+    throw error;
   }
 };
 
 export const getSubmissionsByForm = async (formId) => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    const submissions = getOfflineSubmissions().filter(
-      (submission) => submission.formId === formId
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
     );
-    return createResponse(submissions);
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
   }
 
   try {
@@ -318,14 +256,7 @@ export const getSubmissionsByForm = async (formId) => {
     cacheSubmissionsForForm(formId, response.data);
     return response;
   } catch (error) {
-    if (!shouldUseOfflineFallback(error)) {
-      throw error;
-    }
-
-    const submissions = getOfflineSubmissions().filter(
-      (submission) => submission.formId === formId
-    );
-    return createResponse(submissions);
+    throw error;
   }
 };
 

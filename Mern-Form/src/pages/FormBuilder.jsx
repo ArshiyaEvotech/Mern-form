@@ -1,12 +1,14 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { createForm } from "../Services/api";
+import { createForm, getApiErrorMessage } from "../Services/api";
 import "../App.css";
 
 const FormBuilder = () => {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("survey");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const inputStyle = {
     width: "100%",
@@ -60,12 +62,18 @@ const FormBuilder = () => {
     };
 
     try {
+      setIsSubmitting(true);
+      setError("");
       await createForm(newForm);
       alert("Form Created Successfully");
       setTitle("");
       setType("survey");
-    } catch (_error) {
-      alert("Failed to create form");
+    } catch (error) {
+      const message = getApiErrorMessage(error, "Failed to create form");
+      setError(message);
+      alert(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,16 +87,20 @@ const FormBuilder = () => {
         <div style={{ padding: "20px" }}>
           <h2>Create Form</h2>
 
+          {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+
           <input
             style={inputStyle}
             placeholder="Enter Form Title"
             value={title}
+            disabled={isSubmitting}
             onChange={(e) => setTitle(e.target.value)}
           />
 
           <select
             style={inputStyle}
             value={type}
+            disabled={isSubmitting}
             onChange={(e) => setType(e.target.value)}
           >
             <option value="survey">Survey Form</option>
@@ -105,15 +117,21 @@ const FormBuilder = () => {
           ))}
 
           <div style={{ marginTop: "20px" }}>
-            <button style={btnStyle} onClick={handleCreate}>
-              Create Form
+            <button
+              style={btnStyle}
+              onClick={handleCreate}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Form"}
             </button>
 
             <button
               style={{ ...btnStyle, background: "gray", marginLeft: "10px" }}
+              disabled={isSubmitting}
               onClick={() => {
                 setTitle("");
                 setType("survey");
+                setError("");
               }}
             >
               Cancel
