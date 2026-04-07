@@ -7,6 +7,7 @@ export const baseURL =
 
 const instance = axios.create({
   baseURL,
+  timeout: 8000,
 });
 
 const OFFLINE_FORMS_KEY = "offlineForms";
