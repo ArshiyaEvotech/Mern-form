@@ -19,12 +19,23 @@ const Login = () => {
   }, []);
 
   const handleLogin = async () => {
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail || !password) {
+      setError("Enter both email and password.");
+      setShow(false);
+      return;
+    }
+
     try {
       setError("");
-      const response = await loginUser({ email, password });
+      const response = await loginUser({
+        email: normalizedEmail,
+        password,
+      });
       const { token, user, role } = response.data;
       const resolvedUser = user || {
-        email,
+        email: normalizedEmail,
         role,
       };
 
@@ -39,7 +50,7 @@ const Login = () => {
           ? "Frontend is deployed, but VITE_API_URL is not set in Vercel. Add your backend API URL and redeploy."
           : error.code === "ERR_NETWORK"
           ? `Cannot reach the backend API at ${baseURL}. If your backend is on Render/Railway, make sure it is running and its env vars are set.`
-          : error.response?.data?.message || "Login failed";
+          : error.response?.data?.message || error.message || "Login failed";
       setError(message);
       setShow(false);
       setPassword("");
