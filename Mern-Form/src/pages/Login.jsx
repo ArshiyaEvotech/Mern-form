@@ -10,6 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setEmail("");
@@ -18,7 +19,13 @@ const Login = () => {
     setError("");
   }, []);
 
-  const handleLogin = async () => {
+  const handleLogin = async (event) => {
+    event?.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     const normalizedEmail = email.trim();
 
     if (!normalizedEmail || !password) {
@@ -28,6 +35,7 @@ const Login = () => {
     }
 
     try {
+      setIsSubmitting(true);
       setError("");
       const response = await loginUser({
         email: normalizedEmail,
@@ -54,12 +62,14 @@ const Login = () => {
       setError(message);
       setShow(false);
       setPassword("");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="login-container">
-      <div className="login-box">
+      <form className="login-box" onSubmit={handleLogin}>
         <h2>Sign In</h2>
 
         <div className="info-box">
@@ -72,6 +82,7 @@ const Login = () => {
           placeholder="Enter email"
           value={email}
           autoComplete="off"
+          disabled={isSubmitting}
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -82,12 +93,14 @@ const Login = () => {
             placeholder="Enter password"
             value={password}
             autoComplete="new-password"
+            disabled={isSubmitting}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
             type="button"
             className="password-toggle"
             aria-label={show ? "Hide password" : "Show password"}
+            disabled={isSubmitting}
             onClick={() => setShow((current) => !current)}
           >
             {show ? (
@@ -140,8 +153,10 @@ const Login = () => {
 
         {error && <p className="error">{error}</p>}
 
-        <button onClick={handleLogin}>Continue</button>
-      </div>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Signing In..." : "Continue"}
+        </button>
+      </form>
     </div>
   );
 };

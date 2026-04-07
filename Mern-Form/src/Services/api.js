@@ -7,7 +7,7 @@ export const baseURL =
 
 const instance = axios.create({
   baseURL,
-  timeout: 8000,
+  timeout: 2500,
 });
 
 const OFFLINE_FORMS_KEY = "offlineForms";
@@ -83,6 +83,11 @@ const shouldUseOfflineFallback = (error) => {
   return error.response.status >= 500;
 };
 
+const shouldSkipNetworkRequest = () =>
+  isBrowser &&
+  typeof navigator !== "undefined" &&
+  navigator.onLine === false;
+
 const getOfflineForms = () => readJson(OFFLINE_FORMS_KEY, []);
 const saveOfflineForms = (forms) => writeJson(OFFLINE_FORMS_KEY, forms);
 const getOfflineSubmissions = () => readJson(OFFLINE_SUBMISSIONS_KEY, []);
@@ -139,7 +144,7 @@ const loginOffline = ({ email, password }) => {
 };
 
 export const loginUser = async (payload) => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     return loginOffline(payload);
   }
 
@@ -155,7 +160,7 @@ export const loginUser = async (payload) => {
 };
 
 export const getForms = async () => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     return createResponse(getOfflineForms());
   }
 
@@ -173,7 +178,7 @@ export const getForms = async () => {
 };
 
 export const getFormById = async (id) => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     const form = getOfflineForms().find((item) => item._id === id);
     if (!form) {
       throw createErrorResponse(404, "Form not found");
@@ -199,7 +204,7 @@ export const getFormById = async (id) => {
 };
 
 export const createForm = async (payload) => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     const form = {
       ...payload,
       _id: createId("form"),
@@ -235,7 +240,7 @@ export const createForm = async (payload) => {
 };
 
 export const deleteAllForms = async () => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     saveOfflineForms([]);
     saveOfflineSubmissions([]);
     return createResponse({ message: "All forms deleted successfully" });
@@ -258,7 +263,7 @@ export const deleteAllForms = async () => {
 };
 
 export const submitForm = async (payload) => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     const submission = {
       _id: createId("submission"),
       formId: payload.formId,
@@ -301,7 +306,7 @@ export const submitForm = async (payload) => {
 };
 
 export const getSubmissionsByForm = async (formId) => {
-  if (!baseURL) {
+  if (!baseURL || shouldSkipNetworkRequest()) {
     const submissions = getOfflineSubmissions().filter(
       (submission) => submission.formId === formId
     );

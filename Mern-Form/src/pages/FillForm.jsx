@@ -8,6 +8,7 @@ const FillForm = () => {
   const [form, setForm] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadForm = async () => {
@@ -39,7 +40,13 @@ const FillForm = () => {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    event?.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     const missingField = form.fields.find((field) => !answers[field.label]?.trim());
 
     if (missingField) {
@@ -48,6 +55,7 @@ const FillForm = () => {
     }
 
     try {
+      setIsSubmitting(true);
       await submitForm({
         formId: form._id,
         submittedBy: localStorage.getItem("userEmail") || "user@evotech.global",
@@ -58,6 +66,8 @@ const FillForm = () => {
       navigate("/user");
     } catch (_error) {
       alert("Failed to submit form");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -86,41 +96,45 @@ const FillForm = () => {
           Enter your details below and submit the form.
         </p>
 
-        {form.fields.map((field, index) => (
-          <div key={index} style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>
-              {field.label}
-            </label>
-            <input
-              value={answers[field.label] || ""}
-              placeholder={field.placeholder}
-              onChange={(e) => handleChange(field.label, e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                border: "1px solid #d1d5db",
-                borderRadius: "8px",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-        ))}
+        <form onSubmit={handleSubmit}>
+          {form.fields.map((field, index) => (
+            <div key={index} style={{ marginBottom: "16px" }}>
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>
+                {field.label}
+              </label>
+              <input
+                value={answers[field.label] || ""}
+                placeholder={field.placeholder}
+                disabled={isSubmitting}
+                onChange={(e) => handleChange(field.label, e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "8px",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+          ))}
 
-        <button
-          type="button"
-          onClick={handleSubmit}
-          style={{
-            width: "auto",
-            padding: "10px 18px",
-            background: "#0d6b57",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          Submit
-        </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            style={{
+              width: "auto",
+              padding: "10px 18px",
+              background: "#0d6b57",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
+              opacity: isSubmitting ? 0.7 : 1,
+            }}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </button>
+        </form>
       </div>
     </div>
   );
