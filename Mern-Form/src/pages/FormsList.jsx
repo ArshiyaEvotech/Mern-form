@@ -8,6 +8,7 @@ import "../App.css";
 const FormsList = () => {
   const [forms, setForms] = useState([]);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,9 +17,11 @@ const FormsList = () => {
         const response = await getForms();
         setForms(response.data);
         setError("");
+        setSuccess("");
       } catch (error) {
         setForms([]);
         setError(getApiErrorMessage(error, "Failed to load forms"));
+        setSuccess("");
       }
     };
 
@@ -29,9 +32,11 @@ const FormsList = () => {
     try {
       await deleteAllForms();
       setForms([]);
-      alert("All forms and responses deleted successfully");
-    } catch (_error) {
-      alert("Failed to delete forms");
+      setError("");
+      setSuccess("All forms and responses deleted successfully.");
+    } catch (error) {
+      setSuccess("");
+      setError(getApiErrorMessage(error, "Failed to delete forms"));
     }
   };
 
@@ -73,9 +78,33 @@ const FormsList = () => {
               </p>
             )}
 
+            {success && (
+              <p style={{ marginTop: 0, marginBottom: "14px", color: "#047857" }}>
+                {success}
+              </p>
+            )}
+
             {forms.length === 0 && <p style={{ margin: 0 }}>No forms created yet</p>}
             {forms.length > 0 && (
-              <ol style={{ paddingLeft: "26px", margin: 0 }}>
+              <>
+                <div style={{ marginBottom: "16px" }}>
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    style={{
+                      padding: "10px 14px",
+                      background: "#b91c1c",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete All Forms
+                  </button>
+                </div>
+
+                <ol style={{ paddingLeft: "26px", margin: 0 }}>
                 {forms.map((form) => (
                   <li
                     key={form._id}
@@ -114,7 +143,8 @@ const FormsList = () => {
                     </button>
                   </li>
                 ))}
-              </ol>
+                </ol>
+              </>
             )}
           </div>
         </div>

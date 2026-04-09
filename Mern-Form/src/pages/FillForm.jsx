@@ -10,6 +10,7 @@ const FillForm = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const loadForm = async () => {
@@ -53,25 +54,30 @@ const FillForm = () => {
     const missingField = form.fields.find((field) => !answers[field.label]?.trim());
 
     if (missingField) {
-      alert(`Please fill ${missingField.label}`);
+      setSuccess("");
+      setError(`Please fill ${missingField.label}.`);
       return;
     }
 
     try {
       setIsSubmitting(true);
       setError("");
+      setSuccess("");
       await submitForm({
         formId: form._id,
         submittedBy: localStorage.getItem("userEmail") || "user@evotech.global",
         data: answers,
       });
 
-      alert("Submitted Successfully");
-      navigate("/user");
+      setSuccess("Response submitted successfully.");
+      setAnswers({});
+      setTimeout(() => {
+        navigate("/user");
+      }, 1000);
     } catch (error) {
       const message = getApiErrorMessage(error, "Failed to submit form");
       setError(message);
-      alert(message);
+      setSuccess("");
     } finally {
       setIsSubmitting(false);
     }
@@ -101,6 +107,12 @@ const FillForm = () => {
         <p style={{ color: "#4b5563", marginTop: 0, marginBottom: "24px" }}>
           Enter your details below and submit the form.
         </p>
+
+        {success && (
+          <p style={{ color: "#047857", marginTop: 0, marginBottom: "16px" }}>
+            {success}
+          </p>
+        )}
 
         {error && (
           <p style={{ color: "#b91c1c", marginTop: 0, marginBottom: "16px" }}>

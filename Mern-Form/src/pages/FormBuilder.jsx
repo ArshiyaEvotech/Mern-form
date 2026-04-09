@@ -9,6 +9,7 @@ const FormBuilder = () => {
   const [type, setType] = useState("survey");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const inputStyle = {
     width: "100%",
@@ -51,7 +52,8 @@ const FormBuilder = () => {
 
   const handleCreate = async () => {
     if (!title) {
-      alert("Please enter form title");
+      setSuccess("");
+      setError("Please enter form title.");
       return;
     }
 
@@ -64,14 +66,15 @@ const FormBuilder = () => {
     try {
       setIsSubmitting(true);
       setError("");
+      setSuccess("");
       await createForm(newForm);
-      alert("Form Created Successfully");
+      setSuccess("Form created successfully.");
       setTitle("");
       setType("survey");
     } catch (error) {
       const message = getApiErrorMessage(error, "Failed to create form");
       setError(message);
-      alert(message);
+      setSuccess("");
     } finally {
       setIsSubmitting(false);
     }
@@ -87,6 +90,7 @@ const FormBuilder = () => {
         <div style={{ padding: "20px" }}>
           <h2>Create Form</h2>
 
+          {success && <p style={{ color: "#047857" }}>{success}</p>}
           {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
 
           <input
@@ -132,6 +136,7 @@ const FormBuilder = () => {
                 setTitle("");
                 setType("survey");
                 setError("");
+                setSuccess("");
               }}
             >
               Cancel
