@@ -30,6 +30,18 @@ const FormBuilder = () => {
     fontFamily: '"Segoe UI", Arial, sans-serif',
   };
 
+  const headingStyle = {
+    fontFamily: '"Segoe UI", Arial, sans-serif',
+    color: "#111827",
+  };
+
+  const labelStyle = {
+    fontFamily: '"Segoe UI", Arial, sans-serif',
+    color: "#374151",
+    fontSize: "15px",
+    fontWeight: 500,
+  };
+
   const surveyFields = [
     { label: "Full Name", placeholder: "Enter your full name" },
     { label: "Email", placeholder: "Enter your email address" },
@@ -88,7 +100,7 @@ const FormBuilder = () => {
         <Header title="Admin Panel" />
 
         <div className="page-section">
-          <h2>Create Form</h2>
+          <h2 style={headingStyle}>Create Form</h2>
 
           {success && <p className="success-message">{success}</p>}
           {error && <p className="error-message">{error}</p>}
@@ -111,11 +123,11 @@ const FormBuilder = () => {
             <option value="interview">Interview Form</option>
           </select>
 
-          <h3>Preview</h3>
+          <h3 style={headingStyle}>Preview</h3>
 
           {fields.map((field, index) => (
             <div key={index} style={{ marginBottom: "10px" }}>
-              <label>{field.label}</label>
+              <label style={labelStyle}>{field.label}</label>
               <input style={inputStyle} placeholder={field.placeholder} disabled />
             </div>
           ))}
