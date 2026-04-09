@@ -25,20 +25,16 @@ const UserDashboard = () => {
   }, []);
 
   return (
-    <div style={{ display: "flex", background: "transparent", minHeight: "100vh" }}>
+    <div className="app-shell">
       <Sidebar role="user" />
 
-      <div style={{ marginLeft: "220px", width: "100%", minHeight: "100vh" }}>
+      <div className="app-main">
         <Header title="Interview Page" />
 
-        <div style={{ padding: "28px" }}>
+        <div className="page-section">
           <div
+            className="content-card"
             style={{
-              maxWidth: "760px",
-              background: "transparent",
-              border: "1px solid #e5e7eb",
-              borderRadius: "12px",
-              padding: "22px 24px",
               fontFamily: "Georgia, 'Times New Roman', serif",
             }}
           >

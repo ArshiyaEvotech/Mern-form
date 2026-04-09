@@ -36,13 +36,13 @@ const Submissions = () => {
   }, [id]);
 
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar role="admin" />
 
-      <div style={{ marginLeft: "220px", width: "100%", minHeight: "100vh" }}>
+      <div className="app-main">
         <Header title="Admin Panel" />
 
-        <div style={{ padding: "20px" }}>
+        <div className="page-section">
           <h2 style={{ marginTop: 0 }}>
             Responses for {form?.title || `Form ${id}`}
           </h2>

@@ -1,21 +1,24 @@
 
 
 .login-container { 
-  height: 100vh;
+  min-height: 100vh;
   background: #ced5f0;
   display: flex;
   justify-content: center !important;
   align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
   font-family: "Segoe UI", Arial, sans-serif;
 }
 
 .login-box {
-  width: 350px;
+  width: min(100%, 420px);
   background: white;
   padding: 30px;
   border-radius: 10px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-sizing: border-box;
   font-family: "Segoe UI", Arial, sans-serif !important;
 }
 
@@ -78,7 +81,7 @@
   height: 18px;
 }
 
-button {
+.login-box button {
   width: 100%;
   padding: 12px;
   margin-top: 20px;
@@ -90,7 +93,7 @@ button {
   font-weight: bold;
 }
 
-button:hover {
+.login-box button:hover {
   background: #086c65 !important;
 }
 
@@ -98,6 +101,28 @@ button:hover {
   color: red;
   font-size: 12px;
   margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .login-box {
+    margin-top: 24px;
+    padding: 24px 18px;
+    border-radius: 16px;
+  }
+
+  .login-box h2 {
+    font-size: 24px;
+  }
+
+  .info-box {
+    font-size: 13px;
+    padding: 12px;
+  }
 }
 
 

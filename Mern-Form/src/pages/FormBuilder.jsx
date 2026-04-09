@@ -81,17 +81,17 @@ const FormBuilder = () => {
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar role="admin" />
 
-      <div style={{ marginLeft: "240px", width: "100%", minHeight: "100vh" }}>
+      <div className="app-main">
         <Header title="Admin Panel" />
 
-        <div style={{ padding: "20px" }}>
+        <div className="page-section">
           <h2>Create Form</h2>
 
-          {success && <p style={{ color: "#047857" }}>{success}</p>}
-          {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+          {success && <p className="success-message">{success}</p>}
+          {error && <p className="error-message">{error}</p>}
 
           <input
             style={inputStyle}
@@ -120,8 +120,9 @@ const FormBuilder = () => {
             </div>
           ))}
 
-          <div style={{ marginTop: "20px" }}>
+          <div className="action-row">
             <button
+              className="action-button"
               style={btnStyle}
               onClick={handleCreate}
               disabled={isSubmitting}
@@ -130,7 +131,8 @@ const FormBuilder = () => {
             </button>
 
             <button
-              style={{ ...btnStyle, background: "gray", marginLeft: "10px" }}
+              className="action-button"
+              style={{ ...btnStyle, background: "gray" }}
               disabled={isSubmitting}
               onClick={() => {
                 setTitle("");

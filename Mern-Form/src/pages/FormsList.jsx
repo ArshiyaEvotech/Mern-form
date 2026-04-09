@@ -41,20 +41,16 @@ const FormsList = () => {
   };
 
   return (
-    <div style={{ display: "flex", background: "transparent", minHeight: "100vh" }}>
+    <div className="app-shell">
       <Sidebar role="admin" />
                                              
-      <div style={{ marginLeft: "240px", width: "100%", minHeight: "100vh" }}>
+      <div className="app-main">
         <Header title="Admin Panel" />
 
-        <div style={{ padding: "28px" }}>
+        <div className="page-section">
           <div
+            className="content-card"
             style={{
-              maxWidth: "760px",
-              background: "transparent",
-              border: "1px solid #e5e7eb",
-              borderRadius: "12px",
-              padding: "22px 24px",
               fontFamily: "Georgia, 'Times New Roman', serif",
             }}
           >
@@ -89,6 +85,7 @@ const FormsList = () => {
               <>
                 <div style={{ marginBottom: "16px" }}>
                   <button
+                    className="action-button"
                     type="button"
                     onClick={handleClearAll}
                     style={{
