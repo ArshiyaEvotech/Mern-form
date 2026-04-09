@@ -1,9 +1,16 @@
 import axios from "axios";
 
+const DEFAULT_PRODUCTION_API_URL = "https://mern-form-11.onrender.com/api";
 const envApiUrl = import.meta.env.VITE_API_URL?.trim();
 
-export const baseURL =
-  envApiUrl || (import.meta.env.DEV ? "http://localhost:5000/api" : "");
+const normalizeApiUrl = (url) => url?.replace(/\/+$/, "") || "";
+
+export const baseURL = normalizeApiUrl(
+  envApiUrl ||
+    (import.meta.env.DEV
+      ? "http://localhost:5000/api"
+      : DEFAULT_PRODUCTION_API_URL)
+);
 
 const instance = axios.create({
   baseURL,
