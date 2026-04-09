@@ -203,6 +203,30 @@ export const createForm = async (payload) => {
   }
 };
 
+export const updateForm = async (id, payload) => {
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
+  }
+
+  try {
+    const response = await instance.put(`/forms/${id}`, payload);
+    cacheForm(response.data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const deleteAllForms = async () => {
   if (!baseURL) {
     throw createErrorResponse(
@@ -222,6 +246,35 @@ export const deleteAllForms = async () => {
     const response = await instance.delete("/forms");
     saveOfflineForms([]);
     saveOfflineSubmissions([]);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteForm = async (id) => {
+  if (!baseURL) {
+    throw createErrorResponse(
+      500,
+      "Frontend is running, but VITE_API_URL is not configured."
+    );
+  }
+
+  if (shouldSkipNetworkRequest()) {
+    throw createErrorResponse(
+      503,
+      "You are offline, so the app cannot reach the backend."
+    );
+  }
+
+  try {
+    const response = await instance.delete(`/forms/${id}`);
+    const nextForms = getOfflineForms().filter((form) => form._id !== id);
+    saveOfflineForms(nextForms);
+    const nextSubmissions = getOfflineSubmissions().filter(
+      (submission) => submission.formId !== id
+    );
+    saveOfflineSubmissions(nextSubmissions);
     return response;
   } catch (error) {
     throw error;

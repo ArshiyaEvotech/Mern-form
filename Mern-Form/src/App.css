@@ -176,6 +176,113 @@
   color: inherit !important;
 }
 
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.form-row-actions {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.form-action-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+}
+
+.form-action-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.form-action-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 120px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+  z-index: 20;
+}
+
+.form-action-menu-button {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #111827;
+  text-align: left;
+  cursor: pointer;
+}
+
+.form-action-menu-button:hover {
+  background: #f3f4f6 !important;
+}
+
+.form-action-menu-button.delete {
+  color: #b91c1c;
+}
+
+.form-edit-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.form-edit-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.form-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.form-edit-button {
+  width: auto;
+  margin: 0;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.form-edit-button.save {
+  background: #067762;
+  color: #ffffff;
+}
+
+.form-edit-button.cancel {
+  background: #9ca3af;
+  color: #ffffff;
+}
+
 .interview-form-button::selection {
   background: transparent;
   color: inherit;
@@ -249,6 +356,18 @@
   }
 
   .action-button {
+    width: 100%;
+  }
+
+  .form-row {
+    align-items: flex-start;
+  }
+
+  .form-edit-actions {
+    flex-direction: column;
+  }
+
+  .form-edit-button {
     width: 100%;
   }
 }
