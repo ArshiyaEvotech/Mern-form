@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { deleteAllForms, getApiErrorMessage, getForms } from "../Services/api";
+import { getApiErrorMessage, getForms } from "../Services/api";
 import "../App.css";
 
 const FormsList = () => {
@@ -27,18 +27,6 @@ const FormsList = () => {
 
     loadForms();
   }, []);
-
-  const handleClearAll = async () => {
-    try {
-      await deleteAllForms();
-      setForms([]);
-      setError("");
-      setSuccess("All forms and responses deleted successfully.");
-    } catch (error) {
-      setSuccess("");
-      setError(getApiErrorMessage(error, "Failed to delete forms"));
-    }
-  };
 
   return (
     <div className="app-shell">
@@ -82,25 +70,6 @@ const FormsList = () => {
 
             {forms.length === 0 && <p style={{ margin: 0 }}>No forms created yet</p>}
             {forms.length > 0 && (
-              <>
-                <div style={{ marginBottom: "16px" }}>
-                  <button
-                    className="action-button"
-                    type="button"
-                    onClick={handleClearAll}
-                    style={{
-                      padding: "10px 14px",
-                      background: "#b91c1c",
-                      color: "#ffffff",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete All Forms
-                  </button>
-                </div>
-
                 <ol style={{ paddingLeft: "26px", margin: 0 }}>
                 {forms.map((form) => (
                   <li
@@ -141,7 +110,6 @@ const FormsList = () => {
                   </li>
                 ))}
                 </ol>
-              </>
             )}
           </div>
         </div>
