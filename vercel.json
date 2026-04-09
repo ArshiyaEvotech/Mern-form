@@ -2,5 +2,15 @@
   "framework": "vite",
   "buildCommand": "cd Mern-Form && npm run build",
   "outputDirectory": "Mern-Form/dist",
-  "installCommand": "cd Mern-Form && npm install"
+  "installCommand": "npm install --prefix backend && npm install --prefix Mern-Form",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

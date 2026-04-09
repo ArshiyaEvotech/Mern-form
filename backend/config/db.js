@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+let connectionPromise = null;
+
 const connectDB = async () => {
   try {
     const mongoUri = process.env.MONGO_URI;
@@ -8,9 +10,19 @@ const connectDB = async () => {
       throw new Error('MONGO_URI is not set. Add it to your environment variables before starting the server.');
     }
 
-    await mongoose.connect(mongoUri);
+    if (mongoose.connection.readyState === 1) {
+      return mongoose.connection;
+    }
+
+    if (!connectionPromise) {
+      connectionPromise = mongoose.connect(mongoUri);
+    }
+
+    await connectionPromise;
     console.log('MongoDB Connected...');
+    return mongoose.connection;
   } catch (err) {
+    connectionPromise = null;
     const hints = [];
 
     if (/auth/i.test(err.message)) {
@@ -23,7 +35,7 @@ const connectDB = async () => {
     for (const hint of hints) {
       console.error(`Hint: ${hint}`);
     }
-    process.exit(1);
+    throw err;
   }
 };
 module.exports = connectDB;

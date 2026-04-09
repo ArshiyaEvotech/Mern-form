@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const DEFAULT_PRODUCTION_API_URL = "https://mern-form-11.onrender.com/api";
+const DEFAULT_PRODUCTION_API_URL = "/api";
 const API_TIMEOUT_MS = 30000;
 const WARMUP_TIMEOUT_MS = 45000;
 const envApiUrl = import.meta.env.VITE_API_URL?.trim();
