@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const DEFAULT_PRODUCTION_API_URL = "https://mern-form-11.onrender.com/api";
+const API_TIMEOUT_MS = 30000;
 const envApiUrl = import.meta.env.VITE_API_URL?.trim();
 
 const normalizeApiUrl = (url) => url?.replace(/\/+$/, "") || "";
@@ -14,7 +15,7 @@ export const baseURL = normalizeApiUrl(
 
 const instance = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: API_TIMEOUT_MS,
 });
 
 const OFFLINE_FORMS_KEY = "offlineForms";
@@ -71,7 +72,7 @@ export const getApiErrorMessage = (error, fallbackMessage) => {
   }
 
   if (error?.code === "ECONNABORTED") {
-    return `The backend at ${baseURL} took too long to respond. If it is hosted on Render, it may be waking up. Please wait a few seconds and try again.`;
+    return `The backend at ${baseURL} took too long to respond. It may be waking up on Render. Please wait a few seconds and try again.`;
   }
 
   if (error?.code === "ERR_NETWORK" || !error?.response) {
@@ -123,6 +124,9 @@ export const loginUser = async (payload) => {
   try {
     return await instance.post("/auth/login", payload);
   } catch (error) {
+    if (error?.code === "ECONNABORTED") {
+      return instance.post("/auth/login", payload);
+    }
     throw error;
   }
 };

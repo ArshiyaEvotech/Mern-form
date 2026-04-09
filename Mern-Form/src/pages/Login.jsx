@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { baseURL, loginUser } from "../Services/api";
+import { baseURL, getApiErrorMessage, loginUser } from "../Services/api";
 import "../Login.css";
 
 const Login = () => {
@@ -56,9 +56,7 @@ const Login = () => {
       const message =
         !baseURL
           ? "Frontend is deployed, but VITE_API_URL is not set in Vercel. Add your backend API URL and redeploy."
-          : error.code === "ERR_NETWORK"
-          ? `Cannot reach the backend API at ${baseURL}. If your backend is on Render/Railway, make sure it is running and its env vars are set.`
-          : error.response?.data?.message || error.message || "Login failed";
+          : getApiErrorMessage(error, "Login failed");
       setError(message);
       setShow(false);
       setPassword("");
