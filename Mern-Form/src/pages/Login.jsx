@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  baseURL,
-  getApiErrorMessage,
-  loginUser,
-  warmUpApi,
-} from "../Services/api";
+import { baseURL, getApiErrorMessage, loginUser } from "../Services/api";
 import "../Login.css";
 
 const Login = () => {
@@ -16,40 +11,12 @@ const Login = () => {
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPreparingServer, setIsPreparingServer] = useState(false);
 
   useEffect(() => {
     setEmail("");
     setPassword("");
     setShow(false);
     setError("");
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const prepareServer = async () => {
-      if (!baseURL) {
-        return;
-      }
-
-      try {
-        setIsPreparingServer(true);
-        await warmUpApi();
-      } catch {
-        // Login submission still handles the real error state.
-      } finally {
-        if (isMounted) {
-          setIsPreparingServer(false);
-        }
-      }
-    };
-
-    prepareServer();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const handleLogin = async (event) => {
@@ -106,10 +73,6 @@ const Login = () => {
         <div className="info-box">
           Login using email and password provided by your company
         </div>
-
-        {isPreparingServer && (
-          <p className="info-box">Connecting to server. Login will be faster in a moment.</p>
-        )}
 
         <label>Email</label>
         <input

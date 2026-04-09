@@ -2,7 +2,6 @@ import axios from "axios";
 
 const DEFAULT_PRODUCTION_API_URL = "/api";
 const API_TIMEOUT_MS = 30000;
-const WARMUP_TIMEOUT_MS = 45000;
 const envApiUrl = import.meta.env.VITE_API_URL?.trim();
 
 const normalizeApiUrl = (url) => url?.replace(/\/+$/, "") || "";
@@ -18,8 +17,6 @@ const instance = axios.create({
   baseURL,
   timeout: API_TIMEOUT_MS,
 });
-
-let warmUpPromise = null;
 
 const OFFLINE_FORMS_KEY = "offlineForms";
 const OFFLINE_SUBMISSIONS_KEY = "offlineSubmissions";
@@ -69,21 +66,13 @@ const shouldSkipNetworkRequest = () =>
   typeof navigator !== "undefined" &&
   navigator.onLine === false;
 
-const getHealthCheckUrl = () => {
-  if (!baseURL) {
-    return "";
-  }
-
-  return baseURL.replace(/\/api$/, "") + "/health";
-};
-
 export const getApiErrorMessage = (error, fallbackMessage) => {
   if (!baseURL) {
     return "Frontend is running, but VITE_API_URL is not configured.";
   }
 
   if (error?.code === "ECONNABORTED") {
-    return `The backend at ${baseURL} took too long to respond. It may be waking up on Render. Please wait a few seconds and try again.`;
+    return `The backend at ${baseURL} took too long to respond. Please try again.`;
   }
 
   if (error?.code === "ERR_NETWORK" || !error?.response) {
@@ -91,25 +80,6 @@ export const getApiErrorMessage = (error, fallbackMessage) => {
   }
 
   return error.response?.data?.message || error.message || fallbackMessage;
-};
-
-export const warmUpApi = async () => {
-  if (!baseURL || shouldSkipNetworkRequest()) {
-    return;
-  }
-
-  if (!warmUpPromise) {
-    warmUpPromise = axios
-      .get(getHealthCheckUrl(), { timeout: WARMUP_TIMEOUT_MS })
-      .catch((error) => {
-        throw error;
-      })
-      .finally(() => {
-        warmUpPromise = null;
-      });
-  }
-
-  return warmUpPromise;
 };
 
 const getOfflineForms = () => readJson(OFFLINE_FORMS_KEY, []);
@@ -152,7 +122,6 @@ export const loginUser = async (payload) => {
   }
 
   try {
-    await warmUpApi();
     return await instance.post("/auth/login", payload);
   } catch (error) {
     if (error?.code === "ECONNABORTED") {
