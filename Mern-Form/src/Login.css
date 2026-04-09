@@ -81,7 +81,7 @@
   height: 18px;
 }
 
-.login-box button {
+.login-submit-button {
   width: 100%;
   padding: 12px;
   margin-top: 20px;
@@ -93,7 +93,7 @@
   font-weight: bold;
 }
 
-.login-box button:hover {
+.login-submit-button:hover {
   background: #086c65 !important;
 }
 
